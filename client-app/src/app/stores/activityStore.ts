@@ -13,8 +13,16 @@ class ActivityStore {
     @observable target = '';
 
     @computed get activitiesByDate() {
-        return Array.from(this.activityRegistry.values())
-            .sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+        const activities = Array.from(this.activityRegistry.values());
+        return this.groupActivitiesByDate(activities);        
+    };
+
+    groupActivitiesByDate(activities: IActivity[]) {
+        return Object.entries(activities.reduce((groupedActivities, activity) => {
+            const date = activity.date.split('T')[0];
+            groupedActivities[date] = groupedActivities[date] ? [...groupedActivities[date], activity] : [activity];
+            return groupedActivities;
+        }, {} as {[key: string]: IActivity[]}));
     };
 
     @action loadActivities = async () => {        
