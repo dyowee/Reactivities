@@ -4,6 +4,7 @@ using System;
 using System.Threading.Tasks;
 using System.Threading;
 using Persistence;
+using Application.Errors;
 
 namespace Application.Activities
 {
@@ -23,9 +24,13 @@ namespace Application.Activities
                 _context = context;
             }
 
-            public Task<Activity> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Activity> Handle(Query request, CancellationToken cancellationToken)
             {       
-                return _context.Activities.FindAsync(request.Id).AsTask();     
+                var activity =  await _context.Activities.FindAsync(request.Id);
+                if (activity == null)
+                    throw new RestException(System.Net.HttpStatusCode.NotFound, new { activity = "Not found" });
+                    
+                return activity;  
             }
         }
     }
